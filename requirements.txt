@@ -1,6 +1,5 @@
 colorama
 openai
-anthropic
 requests
 python-dotenv
 json5

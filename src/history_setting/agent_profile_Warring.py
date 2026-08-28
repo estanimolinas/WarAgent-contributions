@@ -23,7 +23,6 @@ __version__ = "0.0.1"
 
 from procoder.functional import format_prompt, replaced_submodule
 from procoder.prompt import *
-import anthropic
 
 
 System_Setting = NamedVariable(
