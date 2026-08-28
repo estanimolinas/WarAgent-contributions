@@ -44,14 +44,13 @@ Message_Constructor = construct_message(action_property_definition)
 
 
 class Agent:
-    def __init__(self, identity, profile, action_list, agents, secretary_agent, model):
+    def __init__(self, identity, profile, action_list, agents, secretary_agent):
         self.profile = profile
         self.action_list = action_list
         self.identity = identity
         self.secretary_agent = secretary_agent
         self.board = Board(this_agent=self.identity.replace("Country ", ""), agents=[a.replace("Country ", "") for a in agents])
         self.stick = Stick(this_agent=self.identity.replace("Country ", ""), agents=[a.replace("Country ", "") for a in agents])
-        self.model = model
 
         self.past_actions = []
 
@@ -72,7 +71,7 @@ class Agent:
             secretary_agree = False
             prompt = without_suggestion_prompt
             while not secretary_agree:
-                thought_process, action_list = generate_action(prompt, self.model, i)
+                thought_process, action_list = generate_action(prompt, i)
                 ##### format checking
                 bad_action_names = self.secretary_agent.check_action_names(action_list)
                 bad_action_inputs = self.secretary_agent.check_action_input(self.identity, action_list)
@@ -145,7 +144,7 @@ class Agent:
             secretary_agree = False
             prompt = without_suggestion_prompt
             while not secretary_agree:
-                thought_process, action_list = generate_action(prompt, self.model, i)                    
+                thought_process, action_list = generate_action(prompt, i)                    
                 responses = action_list['responding_actions']
                 new_actions = action_list['new_actions']
                 ##### format checking
@@ -254,158 +253,158 @@ class Agent:
         return action_history_in_prompt
 
 
-def initialize_WWI_agents(agents, secretary_agent, MODEL):
+def initialize_WWI_agents(agents, secretary_agent):
     set_countries = []
     if 'Country B' in agents or not agents:
         Country_Agent_B = Agent(
-            identity="Country B", profile=Agent_B_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+            identity="Country B", profile=Agent_B_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
         )
         set_countries.append(Country_Agent_B)
 
     if 'Country F' in agents or not agents:
         Country_Agent_F = Agent(
-        identity="Country F", profile=Agent_F_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country F", profile=Agent_F_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_F)
 
     if 'Country P' in agents or not agents:
         Country_Agent_P = Agent(
-        identity="Country P", profile=Agent_P_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country P", profile=Agent_P_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_P)
 
     if 'Country A' in agents or not agents:
         Country_Agent_A = Agent(
-        identity="Country A", profile=Agent_A_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country A", profile=Agent_A_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_A)
 
     if 'Country R' in agents or not agents:
         Country_Agent_R = Agent(
-        identity="Country R", profile=Agent_R_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country R", profile=Agent_R_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_R)
 
     if 'Country S' in agents or not agents:
         Country_Agent_S = Agent(
-        identity="Country S", profile=Agent_S_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country S", profile=Agent_S_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_S)
 
     if 'Country U' in agents or not agents:
         Country_Agent_U = Agent(
-        identity="Country U", profile=Agent_U_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country U", profile=Agent_U_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_U)
     
     if 'Country O' in agents or not agents:
         Country_Agent_O = Agent(
-        identity="Country O", profile=Agent_O_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country O", profile=Agent_O_Profile_WWI, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_O)
 
     return set_countries
 
 
-def initialize_WWII_agents(agents, secretary_agent, MODEL):
+def initialize_WWII_agents(agents, secretary_agent):
     set_countries = []
     if 'Country G' in agents or not agents:
         Country_Agent_G = Agent(
-            identity="Country G", profile=Agent_G_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+            identity="Country G", profile=Agent_G_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
         )
         set_countries.append(Country_Agent_G)
 
     if 'Country J' in agents or not agents:
         Country_Agent_J = Agent(
-        identity="Country J", profile=Agent_J_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country J", profile=Agent_J_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_J)
 
     if 'Country I' in agents or not agents:
         Country_Agent_I = Agent(
-        identity="Country I", profile=Agent_I_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country I", profile=Agent_I_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_I)
 
     if 'Country H' in agents or not agents:
         Country_Agent_H = Agent(
-        identity="Country H", profile=Agent_H_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country H", profile=Agent_H_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_H)
 
     if 'Country A' in agents or not agents:
         Country_Agent_A = Agent(
-        identity="Country A", profile=Agent_A_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country A", profile=Agent_A_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_A)
 
     if 'Country R' in agents or not agents:
         Country_Agent_R = Agent(
-        identity="Country R", profile=Agent_R_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country R", profile=Agent_R_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_R)
 
     if 'Country B' in agents or not agents:
         Country_Agent_B = Agent(
-        identity="Country B", profile=Agent_B_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country B", profile=Agent_B_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_B)
     
     if 'Country C' in agents or not agents:
         Country_Agent_C = Agent(
-        identity="Country C", profile=Agent_C_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country C", profile=Agent_C_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_C)
 
     if 'Country F' in agents or not agents:
         Country_Agent_F = Agent(
-        identity="Country F", profile=Agent_F_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country F", profile=Agent_F_Profile_WWII, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_F)
 
     return set_countries
 
-def initialize_Warring_agents(agents, secretary_agent, MODEL):
+def initialize_Warring_agents(agents, secretary_agent):
     set_countries = []
     if 'Country B' in agents or not agents:
         Country_Agent_Qi = Agent(
-            identity="Country B", profile=Agent_Qi_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+            identity="Country B", profile=Agent_Qi_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
         )
         set_countries.append(Country_Agent_Qi)
 
     if 'Country C' in agents or not agents:
         Country_Agent_Chu = Agent(
-        identity="Country C", profile=Agent_Chu_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country C", profile=Agent_Chu_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Chu)
 
     if 'Country Y' in agents or not agents:
         Country_Agent_Yan = Agent(
-        identity="Country Y", profile=Agent_Yan_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country Y", profile=Agent_Yan_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Yan)
 
     if 'Country H' in agents or not agents:
         Country_Agent_Han = Agent(
-        identity="Country H", profile=Agent_Han_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country H", profile=Agent_Han_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Han)
 
     if 'Country Z' in agents or not agents:
         Country_Agent_Zhao = Agent(
-        identity="Country Z", profile=Agent_Zhao_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country Z", profile=Agent_Zhao_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Zhao)
 
     if 'Country W' in agents or not agents:
         Country_Agent_Wei = Agent(
-        identity="Country W", profile=Agent_Wei_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country W", profile=Agent_Wei_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Wei)
     
     if 'Country Q' in agents or not agents:
         Country_Agent_Qin = Agent(
-        identity="Country Q", profile=Agent_Qin_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent, model=MODEL
+        identity="Country Q", profile=Agent_Qin_Profile, action_list=action_list, agents=agents, secretary_agent=secretary_agent
     )
         set_countries.append(Country_Agent_Qin)
 

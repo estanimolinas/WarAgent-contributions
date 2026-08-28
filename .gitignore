@@ -1,0 +1,5 @@
+WORKLOG.md
+__pycache__/
+.env
+.venv/
+src/log/

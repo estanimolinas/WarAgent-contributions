@@ -1,6 +1,8 @@
 colorama
-openai 
+openai
 anthropic
+requests
+python-dotenv
 json5
 regex
 networkx

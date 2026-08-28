@@ -33,32 +33,31 @@ pip install -r requirements.txt
 ```
 
 ### Set up API keys
-If you want to use OpenAI model as base LLM:
+WarAgent runs on [OpenRouter](https://openrouter.ai), using a free (`:free`) model automatically picked at runtime (the one with the largest context length among those currently available). Either export the key directly:
 ```
-export OPENAI_API_KEY=your_openai_api_key
+export OPENROUTER_API_KEY=your_openrouter_api_key
 ```
-If you want to use Claude model as base:
+or copy `.env.example` to `.env` and fill in your key — it's loaded automatically on startup:
 ```
-export CLAUDE_API_KEY=your_claude_api_key
+cp .env.example .env
 ```
-### Run WarAgent simulation
-Currently, WarAgent supports GPT-4 and Claude-2, two of the strongest large language models. The default choice is GPT-4.
 
+### Run WarAgent simulation
 To run the default setting (historically accurate setting):
 ```
 cd src
-python main.py --model 'your model choice: {claude-2, gpt-4}' --scenario WWI --present_thought_process
+python main.py --scenario WWI --present_thought_process
 ```
 
 To use a different trigger event:
 ```
 new_trigger = 'your trigger event'
-python main.py --model 'your model choice: {claude-2, gpt-4}' --scenario WWI --present_thought_process --trigger new_trigger
+python main.py --scenario WWI --present_thought_process --trigger new_trigger
 ```
 
 ### Demo
 ```
-python main.py --model gpt-4 --scenario WWI --present_thought_process
+python main.py --scenario WWI --present_thought_process
 ```
 link to [video](https://drive.google.com/file/d/1-0dh0Un72LhswMTiPsYn1xTb12xwjy08/view?usp=sharing) with a 5-minute demo using the above command
 

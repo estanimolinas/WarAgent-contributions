@@ -21,11 +21,58 @@ __date__ = "2023/11/28"
 __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
-import anthropic
+import requests
+import openai
 from openai import OpenAI
 from utils import *
 
-def generate_action(prompt, model, round):
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+# Candidate ':free' model ids, sorted by context length descending. Populated
+# once per run by _load_free_model_candidates(). Some of these may turn out
+# to be unusable via the plain chat completions API (e.g. restricted to
+# "agentic harnesses"), so get_daily_free_model() can advance past them.
+_free_model_candidates = None
+_free_model_index = 0
+
+def _load_free_model_candidates():
+    global _free_model_candidates
+    if _free_model_candidates is not None:
+        return
+
+    response = requests.get("{}/models".format(OPENROUTER_BASE_URL))
+    response.raise_for_status()
+    models = response.json()["data"]
+    free_models = [m for m in models if m["id"].endswith(":free")]
+    if not free_models:
+        raise RuntimeError("No free (':free') models are currently available on OpenRouter.")
+
+    _free_model_candidates = sorted(free_models, key=lambda m: m["context_length"], reverse=True)
+
+def get_daily_free_model():
+    """
+    Resolve the free OpenRouter model to use for this run: the ':free'
+    model with the largest context length among those currently offered.
+    Cached after the first call so a single run always talks to the same
+    model, even across retries. If that model turns out to be unusable
+    (see advance_to_next_free_model), the next-largest candidate is used.
+    """
+    _load_free_model_candidates()
+    chosen = _free_model_candidates[_free_model_index]
+    print("Using OpenRouter free model of the day: {} (context length: {})".format(chosen["id"], chosen["context_length"]))
+    return chosen["id"]
+
+def advance_to_next_free_model():
+    """
+    Move past the current free model candidate (e.g. because OpenRouter
+    rejected it as unusable) and fall back to the next-largest one.
+    """
+    global _free_model_index
+    _free_model_index += 1
+    if _free_model_index >= len(_free_model_candidates):
+        raise RuntimeError("No usable free (':free') models left on OpenRouter after exhausting all candidates.")
+
+def generate_action(prompt, round):
     MAX_RETRIES = 10
 
     candidate_start_tokens = [
@@ -40,8 +87,8 @@ def generate_action(prompt, model, round):
         "Actions to Perform:\n",\
     ]
 
-    plan = run_api(model, prompt)
-    
+    plan = run_openrouter(prompt)
+
     n = 0
     while n < MAX_RETRIES:
         if n > 0:
@@ -112,53 +159,29 @@ def generate_action(prompt, model, round):
                     dictionary = {'responding_actions': {}, 'new_actions': {'Wait without Action':None}}
                     thought_process = 'There is nothing special I need to do'
                 break
-            plan = run_api(model, prompt)
+            plan = run_openrouter(prompt)
 
-    return thought_process, dictionary   
+    return thought_process, dictionary
 
 
-def run_api(model, prompt, max_tokens_to_sample: int = 100000, temperature: float = 0):
-    if model.startswith('claude') or model.startswith('Claude'):
-        print("Use Claude-2 to generate action plan...")
-        plan = run_claude(prompt,max_tokens_to_sample=max_tokens_to_sample,temperature=temperature)
-    elif (model.startswith('gpt') or model.startswith('GPT')) and '4' in model:# == "gpt-4-1106-preview":
-        print("Use GPT-4 to generate action plan...")
-        plan = run_gpt(prompt,temperature=temperature,model="gpt-4-1106-preview")
-    elif (model.startswith('gpt') or model.startswith('GPT')) and '3.5' in model:# == "gpt-4-1106-preview":
-        print("Use GPT-3.5 to generate action plan...")
-        plan = run_gpt(prompt,temperature=temperature,model = "gpt-3.5-turbo-1106")
-    else:
-        raise ValueError("Invalid model name")
-    return plan
-
-def run_claude(text_prompt, max_tokens_to_sample: int = 100000, temperature: float = 0):
-    claude_api_key = os.environ["CLAUDE_API_KEY"]
-    client = anthropic.Anthropic(api_key=claude_api_key)
-    prompt = f"{anthropic.HUMAN_PROMPT} {text_prompt}{anthropic.AI_PROMPT}"
-    resp = client.completions.create(
-        prompt=prompt,
-        stop_sequences=[anthropic.HUMAN_PROMPT],
-        # model="claude-v1.3-100k",
-        model="claude-2",
-        max_tokens_to_sample=max_tokens_to_sample,
-        temperature=temperature,
-    ).completion
-    resp = resp.replace("""```json""", '').replace("""```""", '') 
-    return resp
-
-def run_gpt(text_prompt, temperature: float = 0, model = "gpt-4-1106-preview"):
-    open_ai_key = os.environ["OPENAI_API_KEY"]
-    # can also use gpt-3.5-turbo or gpt-4
-    client = OpenAI(api_key=open_ai_key)
-    response = client.chat.completions.create(
-      model = model, 
-      messages=[
-        {"role": "user", "content": text_prompt},
-      ],
-      temperature=temperature,
-    )
-    resp = response.choices[0].message.content   
-    resp = resp.replace("""```json""", '').replace("""```""", '') 
+def run_openrouter(text_prompt, temperature: float = 0):
+    open_router_key = os.environ["OPENROUTER_API_KEY"]
+    client = OpenAI(api_key=open_router_key, base_url=OPENROUTER_BASE_URL)
+    while True:
+        try:
+            response = client.chat.completions.create(
+              model=get_daily_free_model(),
+              messages=[
+                {"role": "user", "content": text_prompt},
+              ],
+              temperature=temperature,
+            )
+            break
+        except openai.PermissionDeniedError as e:
+            print("Free model rejected by OpenRouter ({}), falling back to the next candidate...".format(e))
+            advance_to_next_free_model()
+    resp = response.choices[0].message.content
+    resp = resp.replace("""```json""", '').replace("""```""", '')
     return resp
 
 

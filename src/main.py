@@ -27,15 +27,17 @@ from history_setting.action_definition import action_property_definition
 from prompt import *
 from building_blocks.secretary import Secretary
 from building_blocks.agent import *
-from utils import * 
+from utils import *
 import datetime
 import argparse
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trigger', type=str, default="Country S sent assassins and killed the King of Country A", help='triggering event')
     parser.add_argument('--rounds', type=int, default=10, help='number of rounds')
-    parser.add_argument('--model', type=str, default='gpt-4-1106-preview', help='model name: claude-2 or gpt-4-1106-preview')
     parser.add_argument('--experiment_type', type=str, default='trigger', help='experiment name: accuracy, trigger, or country_profile')
     parser.add_argument('--experiment_name', type=str, default='test', help='special name for experiment in logging file name')
     parser.add_argument('--scenario', type=str, default='WWI', help='WWI, WWII, Warring_States_Period')
@@ -43,9 +45,6 @@ def create_parser():
     parser.add_argument('--present_thought_process', action='store_true', help='whether to print thought process')
     return parser
 
-
-os.environ['CLAUDE_API_KEY'] = ""
-os.environ["OPENAI_API_KEY"] = ""
 
 ## counterfactual triggering event
 # trigger = "Today is sunny and nothing special happened."
@@ -125,11 +124,11 @@ if __name__ == "__main__":
     ### define all agents
     secretary_agent = Secretary(action_property_definition)
     if args.scenario == 'WWI':
-        all_agents = initialize_WWI_agents(WWI_agents, secretary_agent, MODEL=args.model)
+        all_agents = initialize_WWI_agents(WWI_agents, secretary_agent)
     elif args.scenario == 'WWII':
-        all_agents = initialize_WWII_agents(WWII_agents, secretary_agent, MODEL=args.model)
+        all_agents = initialize_WWII_agents(WWII_agents, secretary_agent)
     elif args.scenario == 'Warring_States_Period':
-        all_agents = initialize_Warring_agents(Warring_agents, secretary_agent, MODEL=args.model)
+        all_agents = initialize_Warring_agents(Warring_agents, secretary_agent)
     else:
         raise NotImplementedError
     
